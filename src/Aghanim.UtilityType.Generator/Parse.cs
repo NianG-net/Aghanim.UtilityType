@@ -24,7 +24,7 @@ internal abstract class Parse
         (TypeKind.Interface, _) => SyntaxKind.InterfaceDeclaration,
         _ => throw new ArgumentException("Invalid type kind", nameof(typeKind))
     };
-    public abstract IEnumerable<ISymbol> GetSymbols(IEnumerable<ISymbol> symbols, ImmutableHashSet<string> constructorArguments);
+    public abstract IEnumerable<ISymbol> FilterSymbol(IEnumerable<ISymbol> symbols, ImmutableHashSet<string> constructorArguments);
     public ICollection<(string hitName, string source)> ParseSource(UtilityTypeDeclaration declaration)
     {
         var containingNamespace = declaration.TargetSymbol.ContainingNamespace;
@@ -54,7 +54,7 @@ internal abstract class Parse
         {
             HashSet<MemberDeclarationSyntax> propertys = [];
 
-            var symbols = GetSymbols(attributePair.PropertySymbols, attributePair.ConstructorArguments);
+            var symbols = FilterSymbol(attributePair.PropertySymbols, attributePair.ConstructorArguments);
 
             foreach (ISymbol propertySymbol in symbols)
             {
