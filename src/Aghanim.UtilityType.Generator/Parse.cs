@@ -13,7 +13,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Aghanim.UtilityType.Generator;
 
-internal abstract class Parse
+public abstract class Parse
 {
     public SyntaxKind ParseTypeKind(TypeKind typeKind, bool isRecord) => (typeKind, isRecord) switch
     {
@@ -33,18 +33,17 @@ internal abstract class Parse
         var targetSymbol = declaration.TargetSymbol;
 
 
-        var propertySymbolDict = new Dictionary<string, HashSet<MemberDeclarationSyntax>>();
         var attributeDict =
 
-            from attr in declaration.Attributes
-            let TypeSymbol = attr.AttributeClass.TypeArguments[0]
-            let ConstructorArguments = from typedConstant in attr.ConstructorArguments
-                                       from innerTypedConstant in typedConstant.Values
-                                       select innerTypedConstant.Value.ToString()
-            select new { TypeSymbol, ConstructorArguments } into temp
-            group temp by temp.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) into g
-            let TypeSymbol = g.First().TypeSymbol
-            select new { TypeSymbol, PropertySymbols = TypeSymbol.GetMembers().OfType<IPropertySymbol>(), ConstructorArguments = g.SelectMany(x => x.ConstructorArguments).ToImmutableHashSet() };
+        from attr in declaration.Attributes
+        let TypeSymbol = attr.AttributeClass.TypeArguments[0]
+        let ConstructorArguments = from typedConstant in attr.ConstructorArguments
+                                   from innerTypedConstant in typedConstant.Values
+                                   select innerTypedConstant.Value.ToString()
+        select new { TypeSymbol, ConstructorArguments } into temp
+        group temp by temp.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) into g
+        let TypeSymbol = g.First().TypeSymbol
+        select new { TypeSymbol, PropertySymbols = TypeSymbol.GetMembers().OfType<IPropertySymbol>(), ConstructorArguments = g.SelectMany(x => x.ConstructorArguments).ToImmutableHashSet() };
 
 
 
