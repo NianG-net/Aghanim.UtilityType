@@ -13,7 +13,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Aghanim.UtilityType.Generator;
 
-public abstract class Parse
+public abstract class UtilityTypeGenerator : IIncrementalGenerator
 {
     public SyntaxKind ParseTypeKind(TypeKind typeKind, bool isRecord) => (typeKind, isRecord) switch
     {
@@ -25,7 +25,7 @@ public abstract class Parse
         _ => throw new ArgumentException("Invalid type kind", nameof(typeKind))
     };
     public abstract IEnumerable<ISymbol> FilterSymbol(IEnumerable<ISymbol> symbols, ImmutableHashSet<string> constructorArguments);
-    public ICollection<(string hitName, string source)> ParseSource(UtilityTypeDeclaration declaration)
+    public IEnumerable<(string hitName, string source)> ParseSource(UtilityTypeDeclaration declaration)
     {
         var containingNamespace = declaration.TargetSymbol.ContainingNamespace;
         var fileUsings = containingNamespace.DeclaringSyntaxReferences.SelectMany(x => x.SyntaxTree.GetRoot().DescendantNodes().OfType<UsingDirectiveSyntax>());
@@ -48,7 +48,6 @@ public abstract class Parse
 
 
 
-        HashSet<(string hitName, string source)> result = [];
         foreach (var attributePair in attributeDict)
         {
             HashSet<MemberDeclarationSyntax> propertys = [];
@@ -96,10 +95,32 @@ public abstract class Parse
             }
 
 
-
-            result.Add((hintName, compilationUnit.NormalizeWhitespace().ToFullString()));
+            yield return (hintName, compilationUnit.NormalizeWhitespace().ToFullString());
 
         }
-        return result;
+    }
+    public abstract string AttributeFullName { get; }
+    public virtual void Initialize(IncrementalGeneratorInitializationContext context)
+    {
+#if DEBUG_SOURCE
+        System.Diagnostics.Debugger.Launch();
+#endif
+        var declaration = context.SyntaxProvider.ForAttributeWithMetadataName(
+            AttributeFullName,
+            static (s, _) => s is TypeDeclarationSyntax tds && tds.Modifiers.Any(SyntaxKind.PartialKeyword),
+            static (ctx, _) => (ctx.Attributes, ctx.TargetSymbol)
+            )
+            .Where(x => x.TargetSymbol is INamedTypeSymbol)
+            .Select((x, _) => new UtilityTypeDeclaration(x.Attributes, (INamedTypeSymbol)x.TargetSymbol));
+
+        context.RegisterSourceOutput(declaration, (sourceContext, utilityTypeDeclaration) =>
+        {
+            var result = ParseSource(utilityTypeDeclaration);
+            foreach (var (hitName, source) in result)
+            {
+                sourceContext.AddSource(hitName, source);
+            }
+
+        });
     }
 }
