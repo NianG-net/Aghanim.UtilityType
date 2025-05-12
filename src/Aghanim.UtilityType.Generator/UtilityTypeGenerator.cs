@@ -26,19 +26,15 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
         let PropertySymbols = TypeSymbol.GetMembers().OfType<IPropertySymbol>()
         select new { PropertySymbols, TypeSymbol, ConstructorArguments };
 
+
         var attributeDict = values.ToDictionary(x => x.TypeSymbol, v => v, SymbolEqualityComparer.Default);
-        //into temp
-        //group temp by temp.TypeSymbol into g
-        //let TypeSymbol = g.First().TypeSymbol
-        //select new { TypeSymbol, PropertySymbols = TypeSymbol.GetMembers().OfType<IPropertySymbol>(), ConstructorArguments = g.SelectMany(x => x.ConstructorArguments).ToImmutableHashSet() };
-
-
+       
 
         foreach (var attributePair in attributeDict.Values)
         {
             HashSet<MemberDeclarationSyntax> propertys = [];
 
-            var symbols = FilterSymbol(attributePair.PropertySymbols, attributePair.ConstructorArguments.ToImmutableHashSet());
+            var symbols = FilterSymbol(attributePair.PropertySymbols, [.. attributePair.ConstructorArguments]);
 
             foreach (ISymbol propertySymbol in symbols)
             {
@@ -73,7 +69,7 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
     public abstract string AttributeFullName { get; }
     public virtual void Initialize(IncrementalGeneratorInitializationContext context)
     {
-#if DEBUG_SOURCE
+#if DEBUG_GEN
         System.Diagnostics.Debugger.Launch();
 #endif
         var declaration = context.SyntaxProvider.ForAttributeWithMetadataName(
