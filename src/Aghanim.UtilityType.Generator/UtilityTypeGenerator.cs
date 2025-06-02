@@ -62,9 +62,9 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
 
             if (namespaceDeclaration is not null)
             {
-                namespaceDeclaration = namespaceDeclaration.WithMembers(SingletonList<MemberDeclarationSyntax>(typeDeclaration));
+                namespaceDeclaration = namespaceDeclaration.WithMembers([typeDeclaration]);
                 var compilationUnit = context.SemanticModel.SyntaxTree.GetCompilationUnitRoot()
-                                                                      .WithMembers(SingletonList<MemberDeclarationSyntax>(namespaceDeclaration));
+                                                                      .WithMembers([namespaceDeclaration]);
                 yield return (hintName, compilationUnit.NormalizeWhitespace().ToFullString());
             }
 
