@@ -28,7 +28,7 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
 
 
         var attributeDict = values.ToDictionary(x => x.TypeSymbol, v => v, SymbolEqualityComparer.Default);
-       
+
 
         foreach (var attributePair in attributeDict.Values)
         {
@@ -54,15 +54,23 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
             string hintName = $"{context.TargetSymbol.ToDisplayString()}.{attributePair.TypeSymbol.ToDisplayString()}.g.cs";
 
 
-
             var typeDeclaration = Unsafe.As<TypeDeclarationSyntax>(context.TargetNode)
+                .WithAttributeLists([])
                 .WithMembers(List(propertys));
-            var compilationUnit = context.SemanticModel.SyntaxTree.GetCompilationUnitRoot()
-                                                                  .WithMembers(SingletonList<MemberDeclarationSyntax>(typeDeclaration));
+
+            var namespaceDeclaration = context.TargetNode.Ancestors().OfType<BaseNamespaceDeclarationSyntax>().FirstOrDefault();
+
+            if (namespaceDeclaration is not null)
+            {
+                namespaceDeclaration = namespaceDeclaration.WithMembers(SingletonList<MemberDeclarationSyntax>(typeDeclaration));
+                var compilationUnit = context.SemanticModel.SyntaxTree.GetCompilationUnitRoot()
+                                                                      .WithMembers(SingletonList<MemberDeclarationSyntax>(namespaceDeclaration));
+                yield return (hintName, compilationUnit.NormalizeWhitespace().ToFullString());
+            }
 
 
 
-            yield return (hintName, compilationUnit.NormalizeWhitespace().ToFullString());
+
 
         }
     }

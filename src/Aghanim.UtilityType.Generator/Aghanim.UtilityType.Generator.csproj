@@ -5,7 +5,7 @@
 		<LangVersion>12</LangVersion>
 		<IncludeBuildOutput>false</IncludeBuildOutput>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-		<Configurations>Debug;Release;Debug_Source</Configurations>
+		<Configurations>Debug;Release;Debug_Source;Debug_Gen</Configurations>
 	</PropertyGroup>
 
 
