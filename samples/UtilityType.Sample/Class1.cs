@@ -1,18 +1,15 @@
 ﻿using Aghanim.UtilityType;
 
-namespace UtilityType.Sample
+namespace UtilityType.Sample;
+
+public class Entity
 {
-    public class One
-    {
-        public string? Name { get; set; }
-        public int Id { get; set; }
-    }
+    public string? Name { get; set; }
+    public int Id { get; set; }
 
-    [Pick<One>("Name")]
-    public partial class Two
-    {
-        public long Code { get; set; }
-    }
-
-
+    public DateTime CreateOn { get; set; }
 }
+
+
+[Omit<Entity>("CreateOn")]
+public partial class DtoDEMO;
