@@ -28,8 +28,9 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
 
         var symbolDict = values.GroupBy(x => x.TypeSymbol, SymbolEqualityComparer.Default)
 
-            .Select(x => new {
-                TypeSymbol = x.Key,
+            .Select(x => new
+            {
+                TypeSymbol = Unsafe.As<ITypeSymbol>(x.Key),
 
                 PropertySymbols = Unsafe.As<ITypeSymbol>(x.Key).GetMembers().OfType<IPropertySymbol>(),
                 ConstructorArguments = x.SelectMany(x => x.ConstructorArguments).ToImmutableHashSet()
@@ -39,21 +40,36 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
 
 
 
-        foreach (var symbolItem  in symbolDict)
+        foreach (var symbolItem in symbolDict)
         {
             HashSet<MemberDeclarationSyntax> propertys = [];
 
             var symbols = FilterSymbol(symbolItem.PropertySymbols, [.. symbolItem.ConstructorArguments]);
 
-            foreach (ISymbol propertySymbol in symbols)
+            foreach (IPropertySymbol propertySymbol in symbols)
             {
                 foreach (SyntaxReference syntaxReference in propertySymbol.DeclaringSyntaxReferences)
                 {
-                    var syntax = (MemberDeclarationSyntax)syntaxReference.GetSyntax();
 
+
+                    var node = syntaxReference.GetSyntax();
+                    if (node is ParameterSyntax)
+                    {
+                        var typeSyntax = ParseTypeName(propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+                        node = PropertyDeclaration(typeSyntax, propertySymbol.Name).WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
+                            .WithAccessorList(AccessorList(List([
+                                AccessorDeclaration(SyntaxKind.GetAccessorDeclaration).WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
+                                AccessorDeclaration(SyntaxKind.InitAccessorDeclaration).WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
+                            ])));
+                    }
+                    
+                    var syntax = Unsafe.As<MemberDeclarationSyntax>(node);
+                    if (symbolItem.TypeSymbol is { TypeKind: TypeKind.Interface } && !syntax.Modifiers.Any(SyntaxKind.PublicKeyword))
+                    {
+                        syntax = syntax.AddModifiers(Token(SyntaxKind.PublicKeyword));
+
+                    }
                     propertys.Add(syntax);
-
-
                 }
 
 

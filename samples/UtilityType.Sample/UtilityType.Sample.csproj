@@ -1,15 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Configurations>Debug;Release;Debug_Gen</Configurations>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Configurations>Debug;Release;Debug_Gen</Configurations>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Aghanim.UtilityType.Generator\Aghanim.UtilityType.Generator.csproj" OutputItemType="Analyzer" Reference0utputAssembly="false" />
-    <ProjectReference Include="..\..\src\Aghanim.UtilityType\Aghanim.UtilityType.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Aghanim.UtilityType.Generator\Aghanim.UtilityType.Generator.csproj" OutputItemType="Analyzer" Reference0utputAssembly="false" />
+		<ProjectReference Include="..\..\src\Aghanim.UtilityType\Aghanim.UtilityType.csproj" />
+	</ItemGroup>
 
 </Project>
