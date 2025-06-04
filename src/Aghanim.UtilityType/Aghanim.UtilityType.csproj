@@ -6,6 +6,16 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<Configurations>Debug;Release;Debug_Gen</Configurations>
+		<Authors>NianG-net</Authors>
+		<PackageId>Aghanim.UtilityType</PackageId>
+		<Description>c# get UtilityType like ts</Description>
+		<RepositoryUrl>https://github.com/NianG-net/Aghanim.UtilityType</RepositoryUrl>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 	</PropertyGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<None Include="..\..\README.md" Pack="true" PackagePath="" />
+		<ProjectReference Include="..\Aghanim.UtilityType.Generator\Aghanim.UtilityType.Generator.csproj" PrivateAssets="all" />
+		<Content Include="$(OutputPath)\Aghanim.UtilityType.Generator.dll" PackagePath="analyzers/dotnet/cs" Visible="false" />
+	</ItemGroup>
 
 </Project>
