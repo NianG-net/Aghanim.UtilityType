@@ -8,6 +8,7 @@
 		<Configurations>Debug;Release;Debug_Gen</Configurations>
 		<Authors>NianG-net</Authors>
 		<PackageId>Aghanim.UtilityType</PackageId>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<Description>c# get UtilityType like ts</Description>
 		<RepositoryUrl>https://github.com/NianG-net/Aghanim.UtilityType</RepositoryUrl>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>

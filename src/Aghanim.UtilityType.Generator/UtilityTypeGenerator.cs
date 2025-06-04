@@ -55,6 +55,8 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
 
 
             var typeDeclaration = Unsafe.As<TypeDeclarationSyntax>(context.TargetNode)
+                .WithOpenBraceToken(Token(SyntaxKind.OpenBraceToken))
+                .WithCloseBraceToken(Token(SyntaxKind.CloseBraceToken))
                 .WithAttributeLists([])
                 .WithMembers(List(propertys));
 
