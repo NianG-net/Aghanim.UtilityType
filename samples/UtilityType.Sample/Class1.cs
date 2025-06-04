@@ -12,4 +12,5 @@ public class Entity
 
 
 [Omit<Entity>("CreateOn")]
+[Omit<Entity>("Name")]
 public partial class DtoDEMO;

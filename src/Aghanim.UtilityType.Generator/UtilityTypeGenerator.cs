@@ -23,18 +23,27 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
         let ConstructorArguments = from typedConstant in attr.ConstructorArguments
                                    from innerTypedConstant in typedConstant.Values
                                    select innerTypedConstant.Value.ToString()
-        let PropertySymbols = TypeSymbol.GetMembers().OfType<IPropertySymbol>()
-        select new { PropertySymbols, TypeSymbol, ConstructorArguments };
+        select new { TypeSymbol, ConstructorArguments };
 
 
-        var attributeDict = values.ToDictionary(x => x.TypeSymbol, v => v, SymbolEqualityComparer.Default);
+        var symbolDict = values.GroupBy(x => x.TypeSymbol, SymbolEqualityComparer.Default)
+
+            .Select(x => new {
+                TypeSymbol = x.Key,
+
+                PropertySymbols = Unsafe.As<ITypeSymbol>(x.Key).GetMembers().OfType<IPropertySymbol>(),
+                ConstructorArguments = x.SelectMany(x => x.ConstructorArguments).ToImmutableHashSet()
+            });
 
 
-        foreach (var attributePair in attributeDict.Values)
+
+
+
+        foreach (var symbolItem  in symbolDict)
         {
             HashSet<MemberDeclarationSyntax> propertys = [];
 
-            var symbols = FilterSymbol(attributePair.PropertySymbols, [.. attributePair.ConstructorArguments]);
+            var symbols = FilterSymbol(symbolItem.PropertySymbols, [.. symbolItem.ConstructorArguments]);
 
             foreach (ISymbol propertySymbol in symbols)
             {
@@ -51,7 +60,7 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
             }
 
 
-            string hintName = $"{context.TargetSymbol.ToDisplayString()}.{attributePair.TypeSymbol.ToDisplayString()}.g.cs";
+            string hintName = $"{context.TargetSymbol.ToDisplayString()}.{symbolItem.TypeSymbol.ToDisplayString()}.g.cs";
 
 
             var typeDeclaration = Unsafe.As<TypeDeclarationSyntax>(context.TargetNode)
