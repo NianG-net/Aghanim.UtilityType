@@ -11,10 +11,10 @@ public class Entity(int C)
     public DateTime CreateOn { get; set; }
 }
 
-public interface IEntity(int C)
+public interface IEntity
 {
     string? Name { get; set; }
-    int Id { get; set; }
+    static int Id { get; set; }
 
     public DateTime CreateOn { get; set; }
 }

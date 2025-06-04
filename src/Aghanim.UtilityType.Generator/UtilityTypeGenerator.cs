@@ -64,8 +64,10 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
                     }
                     
                     var syntax = Unsafe.As<MemberDeclarationSyntax>(node);
-                    if (symbolItem.TypeSymbol is { TypeKind: TypeKind.Interface } && !syntax.Modifiers.Any(SyntaxKind.PublicKeyword))
+                    if (symbolItem.TypeSymbol is { TypeKind: TypeKind.Interface } && propertySymbol.DeclaredAccessibility == Accessibility.Public
+                        && !syntax.Modifiers.Any(SyntaxKind.PublicKeyword))
                     {
+
                         syntax = syntax.AddModifiers(Token(SyntaxKind.PublicKeyword));
 
                     }
