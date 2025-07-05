@@ -14,7 +14,9 @@ namespace Aghanim.UtilityType.Generator;
 public abstract class UtilityTypeGenerator : IIncrementalGenerator
 {
     public abstract IEnumerable<ISymbol> FilterSymbol(IEnumerable<ISymbol> symbols, ImmutableHashSet<string> constructorArguments);
-    public IEnumerable<(string hitName, string source)> ParseSource(GeneratorAttributeSyntaxContext context)
+
+    public abstract string DefaultOptionKey { get; }
+    public IEnumerable<(string hitName, string source)> ParseSource(GeneratorAttributeSyntaxContext context, string[] defaultOptions)
     {
         var values =
 
@@ -44,7 +46,7 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
         {
             HashSet<MemberDeclarationSyntax> propertys = [];
 
-            var symbols = FilterSymbol(symbolItem.PropertySymbols, [.. symbolItem.ConstructorArguments]);
+            var symbols = FilterSymbol(symbolItem.PropertySymbols, [.. symbolItem.ConstructorArguments, .. defaultOptions]);
 
             foreach (IPropertySymbol propertySymbol in symbols)
             {
@@ -62,7 +64,7 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
                                 AccessorDeclaration(SyntaxKind.InitAccessorDeclaration).WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
                             ])));
                     }
-                    
+
                     var syntax = Unsafe.As<MemberDeclarationSyntax>(node);
                     if (symbolItem.TypeSymbol is { TypeKind: TypeKind.Interface } && propertySymbol.DeclaredAccessibility == Accessibility.Public
                         && !syntax.Modifiers.Any(SyntaxKind.PublicKeyword))
@@ -116,9 +118,18 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
             .Where(x => x.TargetSymbol is INamedTypeSymbol)
             .Select((x, _) => x);
 
-        context.RegisterSourceOutput(declaration, (sourceContext, utilityTypeDeclaration) =>
+        var defaultOptions = context.AnalyzerConfigOptionsProvider.Select((options, _) =>
         {
-            var result = ParseSource(utilityTypeDeclaration);
+            if (options.GlobalOptions.TryGetValue($"build_property.{DefaultOptionKey}", out var assemblys))
+            {
+                return assemblys.Split(';');
+            }
+            return [];
+        });
+        var combined = declaration.Combine(defaultOptions);
+        context.RegisterSourceOutput(combined, (sourceContext, utilityTypeDeclaration) =>
+        {
+            var result = ParseSource(utilityTypeDeclaration.Left, utilityTypeDeclaration.Right);
             foreach (var (hitName, source) in result)
             {
                 sourceContext.AddSource(hitName, source);
