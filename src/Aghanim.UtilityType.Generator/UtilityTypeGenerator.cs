@@ -120,9 +120,9 @@ public abstract class UtilityTypeGenerator : IIncrementalGenerator
 
         var defaultOptions = context.AnalyzerConfigOptionsProvider.Select((options, _) =>
         {
-            if (options.GlobalOptions.TryGetValue($"build_property.{DefaultOptionKey}", out var assemblys))
+            if (options.GlobalOptions.TryGetValue($"build_property.{DefaultOptionKey}", out var congfig))
             {
-                return assemblys.Split(';');
+                return congfig.Split(';');
             }
             return [];
         });

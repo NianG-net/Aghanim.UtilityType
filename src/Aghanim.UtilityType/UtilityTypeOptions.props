@@ -1,0 +1,6 @@
+<Project>
+	<ItemGroup>
+		<CompilerVisibleProperty Include="DefaultOmitProperty" />
+		<CompilerVisibleProperty Include="DefaultPickProperty" />
+	</ItemGroup>
+</Project>
